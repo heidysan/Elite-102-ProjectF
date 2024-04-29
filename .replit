@@ -1,0 +1,75 @@
+# importing tkinkter
+
+import tkinter as tk
+from tkinter import messagebox
+import sqlite3
+
+# creating a window
+def login():
+    username = username_entry.get()
+    password = password_entry.get()
+    conn = sqlite3.connect('bank.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
+    user = c.fetchone()
+    conn.close()
+    if user:
+        if user[2] == 'admin':
+            messagebox.showinfo('Login Successful', 'Welcome, Admin!')
+          admin_menu()
+        else:   
+            messagebox.showinfo('Login Successful', f'Welcome, {username}!')
+          user_name()
+    else:
+      messagebox.showerror('Login Failed', 'Invalid username or password.')
+
+#new users  
+def create_account():
+    username = username_entry.get()
+    password = password_entry.get()
+    conn = sqlite3.connect('bank.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", (username, password, 0))
+    conn.commit()
+    conn.close()
+    messagebox.showinfo('Account Created', f'Account for {username} created successfully!')
+
+#deposit option
+def deposit():
+  amount = float(deposit_entry.get())
+  conn = sqlite3.connect('bank.db')
+  c = conn.cursor()
+  c.execute("SELECT balance FROM users WHERE username = ?", (username,))
+  messagebox.showinfo('Deposit Successful', f'Deposit of {amount} successful!')
+
+#withdraw option
+def withdraw():
+  amount = float(withdraw_entry.get())
+  conn = sqlite3.connect('bank.db')
+  c = conn.cursor()
+  c.execute("SELECT balance FROM users WHERE username = ?", (username,))
+
+# UI with tk
+root = tk.Tk()
+root.title('Panda Online Banking Application')
+login_frame = tk.Frame(root)
+login_frame.pack(pady=20)
+tk.Label(login_frame, text='Username:').grid(row=0, column=0)
+username_entry = tk.Entry(login_frame)
+username_entry.grid(row=0, column=1)
+tk.Label(login_frame, text='Password:').grid(row=1, column=0)
+password_entry = tk.Entry(login_frame, show='*')
+password_entry.grid(row=1, column=1)
+login_button = tk.Button(login_frame, text='Login', command=login)
+login_button.grid(row=2, column=0, columnspan=2, pady=10)
+create_account_frame = tk.Frame(root)
+create_account_frame.pack(pady=20)
+tk.Label(create_account_frame, text='New Username:').grid(row=0, column=0)
+new_username_entry = tk.Entry(create_account_frame)
+new_username_entry.grid(row=0, column=1)
+tk.Label(create_account_frame, text='New Password:').grid(row=1, column=0)
+new_password_entry = tk.Entry(create_account_frame, show='*')
+new_password_entry.grid(row=1, column=1)
+create_account_button = tk.Button(create_account_frame, text='Create Account', command=create_account)
+create_account_button.grid(row=2, column=0, columnspan=2, pady=10)
+root.mainloop()
